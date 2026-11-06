@@ -1,0 +1,31 @@
+name: Publish ArcaneBooks resource pack
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'arcane_books/generate_pack.py'
+      - '.github/workflows/arcane-resource-pack.yml'
+permissions:
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Generate public Minecraft resource pack
+        run: python arcane_books/generate_pack.py
+      - name: Commit updated ZIP
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add ArcaneBooks-ResourcePack.zip
+          if ! git diff --cached --quiet; then
+            git commit -m "Update public ArcaneBooks resource pack"
+            git push
+          fi
